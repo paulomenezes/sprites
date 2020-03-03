@@ -1,11 +1,11 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
-import sprite from "./sprite.png";
+import sprite from './sprite.png';
 
 export default class App extends Component {
   state = {
     width: 200,
-    height: 189,
+    height: 192,
     moves: [],
     newMove: 5,
     rectangles: [],
@@ -16,7 +16,7 @@ export default class App extends Component {
     selectMoveRectangleI: -1,
     selectMoveRectangleJ: -1,
     canvas: null,
-    context: null
+    context: null,
   };
 
   componentDidMount() {
@@ -24,11 +24,11 @@ export default class App extends Component {
 
     image.onload = () => {
       const canvas = this.refs.canvas;
-      const context = canvas.getContext("2d");
+      const context = canvas.getContext('2d');
 
       this.setState({
         canvas,
-        context
+        context,
       });
 
       this.rect = canvas.getBoundingClientRect(); // abs. size of element
@@ -53,12 +53,11 @@ export default class App extends Component {
     const width = +this.state.width;
     const height = +this.state.height;
 
-    context.strokeStyle = "red";
+    context.strokeStyle = 'red';
     context.beginPath();
     context.rect(0, 0, width, height);
     context.stroke();
 
-    console.log(width, height, this.state);
     let startLine = 0;
     let endLine = 0;
     let newLine = false;
@@ -67,19 +66,14 @@ export default class App extends Component {
     const columns = [];
 
     this.setState({
-      rectangles: []
+      rectangles: [],
     });
 
-    for (let y = 0; y < 200; y++) {
+    for (let y = 0; y < height; y++) {
       let line = true;
       for (let x = 0; x < width; x++) {
         const pixelData = context.getImageData(x, y, 1, 1).data;
-        if (
-          pixelData[0] !== 0 &&
-          pixelData[1] !== 0 &&
-          pixelData[2] !== 0 &&
-          pixelData[3] !== 0
-        ) {
+        if (pixelData[0] !== 0 && pixelData[1] !== 0 && pixelData[2] !== 0 && pixelData[3] !== 0) {
           line = false;
           break;
         }
@@ -98,13 +92,6 @@ export default class App extends Component {
       if (!line && !newLine) {
         newLine = true;
         const middle = startLine + Math.floor((endLine - startLine) / 2);
-        console.log(startLine, endLine, middle);
-
-        // context.strokeStyle = 'blue';
-        // context.beginPath();
-        // context.moveTo(0, middle);
-        // context.lineTo(width, middle);
-        // context.stroke();
 
         rows.push([0, middle, width, middle]);
       }
@@ -118,12 +105,7 @@ export default class App extends Component {
       let line = true;
       for (let y = 0; y < 200; y++) {
         const pixelData = context.getImageData(x, y, 1, 1).data;
-        if (
-          pixelData[0] !== 0 &&
-          pixelData[1] !== 0 &&
-          pixelData[2] !== 0 &&
-          pixelData[3] !== 0
-        ) {
+        if (pixelData[0] !== 0 && pixelData[1] !== 0 && pixelData[2] !== 0 && pixelData[3] !== 0) {
           line = false;
           break;
         }
@@ -142,123 +124,79 @@ export default class App extends Component {
       if ((!line && !newLine) || x === width - 1) {
         newLine = true;
         const middle = startLine + Math.floor((endLine - startLine) / 2);
-        console.log(startLine, endLine, middle);
-
-        // context.strokeStyle = 'blue';
-        // context.beginPath();
-        // context.moveTo(middle, 0);
-        // context.lineTo(middle, height);
-        // context.stroke();
 
         columns.push([middle, 0, middle, height]);
       }
     }
 
-    console.log(rows);
-    console.log(columns);
-    const points = [];
-
-    for (const row of rows) {
-      for (const column of columns) {
-        // console.log(row, column, this.intersects(...row, ...column));
-        const x1 = row[0];
-        const y1 = row[1];
-
-        const x2 = row[2];
-        const y2 = row[3];
-
-        const x3 = column[0];
-        const y3 = column[1];
-
-        const x4 = column[2];
-        const y4 = column[3];
-
-        const pX =
-          ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) /
-          ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
-
-        const pY =
-          ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) /
-          ((x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4));
-
-        // console.log(row, column, pX, pY);
-
-        points.push([pX, pY]);
-      }
-    }
-
-    console.log(points);
     const rectangles = [];
 
-    for (let i = 0; i < points.length; i++) {
-      const point = points[i];
-      let distances = [];
+    for (let i = 0; i < rows.length - 1; i++) {
+      const row = rows[i];
+      const nextRow = rows[i + 1];
 
-      const found = [false, false, false];
-      for (const p of points) {
-        const dx = p[0] - point[0];
-        const dy = p[1] - point[1];
+      for (let j = 0; j < columns.length - 1; j++) {
+        const col = columns[j];
+        const nextCol = columns[j + 1];
 
-        if (
-          (!found[0] && dx > 0 && dy > 0) ||
-          (!found[1] && dx === 0 && dy > 0) ||
-          (!found[2] && dx > 0 && dy === 0)
-        ) {
-          if (dx > 0 && dy > 0) {
-            found[0] = true;
-          }
-          if (dx === 0 && dy > 0) {
-            found[1] = true;
-          }
-          if (dx > 0 && dy === 0) {
-            found[2] = true;
-          }
+        const X = col[0];
+        const Y = row[1];
+        const w = nextCol[0] - X;
+        const h = nextRow[1] - Y;
 
-          distances.push({
-            d: this.distance(point[0], point[1], p[0], p[1]),
-            p
-          });
+        const imageData = this.state.context.getImageData(X, Y, w, h);
+        const buffer = new Uint32Array(imageData.data.buffer);
+        let x;
+        let y;
+        let x1 = w;
+        let y1 = h;
+        let x2 = 0;
+        let y2 = 0;
+
+        for (y = 0; y < h; y++) {
+          for (x = 0; x < w; x++) {
+            if (buffer[x + y * w] > 0) {
+              if (x < x1) x1 = x;
+            }
+          }
         }
 
-        if (found[0] && found[1] && found[2]) {
-          break;
+        for (y = 0; y < h; y++) {
+          for (x = w; x >= 0; x--) {
+            if (buffer[x + y * w] > 0) {
+              if (x > x2) x2 = x;
+            }
+          }
         }
-      }
-      if (distances.length < 2 || point[0] === distances[2].p[0]) {
-        continue;
-      }
 
-      distances.sort((a, b) => a.d - b.d);
+        for (x = 0; x < w; x++) {
+          for (y = 0; y < h; y++) {
+            if (buffer[x + y * w] > 0) {
+              if (y < y1) y1 = y;
+            }
+          }
+        }
 
-      rectangles.push([
-        point[0],
-        point[1],
-        distances[2].p[0] - point[0],
-        distances[2].p[1] - point[1]
-      ]);
+        for (x = 0; x < w; x++) {
+          for (y = h; y >= 0; y--) {
+            if (buffer[x + y * w] > 0) {
+              if (y > y2) y2 = y;
+            }
+          }
+        }
+
+        context.strokeStyle = 'green';
+        context.beginPath();
+        context.rect(X + x1, Y + y1, x2 - x1, y2 - y1);
+        context.stroke();
+
+        rectangles.push([X + x1, Y + y1, x2 - x1, y2 - y1]);
+      }
     }
 
-    console.log(rectangles);
     this.setState({
-      rectangles
+      rectangles,
     });
-
-    // for (const rectangle of rectangles) {
-    //   context.strokeStyle = 'blue';
-    //   context.beginPath();
-    //   context.rect(rectangle[0], rectangle[1], rectangle[2], rectangle[3]);
-    //   context.stroke();
-
-    //   // context.strokeStyle = 'blue';
-    //   // context.beginPath();
-    //   // context.rect(rectangle[0], rectangle[1], 2, 2);
-    //   // context.stroke();
-
-    //   // context.strokeStyle = 'red';
-    //   // context.beginPath();
-    //   // context.rect(rectangle[2], rectangle[3], 2, 2);
-    //   // context.stroke();
-    // }
   }
 
   reload() {
@@ -271,99 +209,98 @@ export default class App extends Component {
     const width = +this.state.width;
     const height = +this.state.height;
 
-    context.strokeStyle = "red";
+    context.strokeStyle = 'red';
     context.beginPath();
     context.rect(0, 0, width, height);
     context.stroke();
 
     if (this.state.hoverRectangle > -1) {
-      context.strokeStyle = "blue";
+      context.strokeStyle = 'blue';
       context.beginPath();
       context.rect(
         this.state.rectangles[this.state.hoverRectangle][0],
         this.state.rectangles[this.state.hoverRectangle][1],
         this.state.rectangles[this.state.hoverRectangle][2],
-        this.state.rectangles[this.state.hoverRectangle][3]
+        this.state.rectangles[this.state.hoverRectangle][3],
       );
       context.stroke();
     }
 
-    // if (this.state.selectedRectangle > -1) {
-    //   context.strokeStyle = "red";
-    //   context.beginPath();
-    //   context.rect(
-    //     this.state.rectangles[this.state.selectedRectangle][0],
-    //     this.state.rectangles[this.state.selectedRectangle][1],
-    //     this.state.rectangles[this.state.selectedRectangle][2],
-    //     this.state.rectangles[this.state.selectedRectangle][3]
-    //   );
-    //   context.stroke();
-    // }
-
     for (let i = 0; i < this.state.moves.length; i++) {
       const move = this.state.moves[i];
+      const position = this.calculateMove(i);
 
-      context.fillText(move.name, move.x, move.y);
+      context.fillText(move.name, position.x, position.y);
 
       for (let j = 0; j < move.sizes.length; j++) {
-        if (
-          this.state.selectMoveRectangleI === i &&
-          this.state.selectMoveRectangleJ === j
-        ) {
-          context.strokeStyle = "red";
-        } else if (
-          this.state.hoverMoveRectangleI === i &&
-          this.state.hoverMoveRectangleJ === j
-        ) {
-          context.strokeStyle = "blue";
-        } else {
-          context.strokeStyle = "black";
-        }
-
-        context.beginPath();
-        context.rect(move.sizes[j].x, move.sizes[j].y, move.width, move.height);
-        context.stroke();
+        const sizePosition = this.calculateSprite(i, j);
 
         if (move.sizes[j].rectangle > -1) {
           const imageData = this.state.context.getImageData(
             this.state.rectangles[move.sizes[j].rectangle][0],
             this.state.rectangles[move.sizes[j].rectangle][1],
             this.state.rectangles[move.sizes[j].rectangle][2],
-            this.state.rectangles[move.sizes[j].rectangle][3]
+            this.state.rectangles[move.sizes[j].rectangle][3],
           );
 
-          this.state.context.putImageData(
-            imageData,
-            move.sizes[j].x,
-            move.sizes[j].y
-          );
+          this.state.context.putImageData(imageData, sizePosition.x, sizePosition.y);
         }
+
+        if (this.state.selectMoveRectangleI === i && this.state.selectMoveRectangleJ === j) {
+          context.strokeStyle = 'red';
+        } else if (this.state.hoverMoveRectangleI === i && this.state.hoverMoveRectangleJ === j) {
+          context.strokeStyle = 'blue';
+        } else {
+          context.strokeStyle = 'black';
+        }
+
+        context.beginPath();
+        context.rect(sizePosition.x, sizePosition.y, move.width, move.height);
+        context.stroke();
       }
+
+      const previewPosition = this.calculateSprite(i, move.sizes.length);
+      context.strokeStyle = 'green';
+      context.beginPath();
+      context.rect(previewPosition.x - 1, previewPosition.y - 1, move.width + 2, move.height + 2);
+      context.stroke();
     }
   }
 
-  distance(x1, y1, x2, y2) {
-    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+  calculateMove(i) {
+    let y = 20;
+
+    const moves = this.state.moves;
+    for (let k = 0; k < i; k++) {
+      const move = moves[k];
+      y += (move.height + 10) * 2;
+    }
+
+    return {
+      x: 250,
+      y,
+    };
   }
 
-  intersects(a, b, c, d, p, q, r, s) {
-    var det, gamma, lambda;
-    det = (c - a) * (s - q) - (r - p) * (d - b);
-    if (det === 0) {
-      return false;
-    } else {
-      lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
-      gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
-      return 0 < lambda && lambda < 1 && 0 < gamma && gamma < 1;
-    }
+  calculateSprite(i, j) {
+    const position = this.calculateMove(i);
+    const move = this.state.moves[i];
+
+    let x = position.x + (move.width + 10) * j;
+    let y = position.y + 10;
+
+    return {
+      x,
+      y,
+    };
   }
 
   render() {
     return (
-      <div style={{ display: "flex" }}>
+      <div style={{ display: 'flex' }}>
         <canvas
-          ref="canvas"
-          width={500}
+          ref='canvas'
+          width={600}
           height={window.innerHeight}
           onMouseMove={event => {
             if (!this.rect) {
@@ -376,7 +313,7 @@ export default class App extends Component {
             this.setState({
               hoverRectangle: -1,
               hoverMoveRectangleI: -1,
-              hoverMoveRectangleJ: -1
+              hoverMoveRectangleJ: -1,
             });
 
             for (let i = 0; i < this.state.rectangles.length; i++) {
@@ -395,17 +332,12 @@ export default class App extends Component {
             for (let i = 0; i < this.state.moves.length; i++) {
               const move = this.state.moves[i];
               for (let j = 0; j < move.sizes.length; j++) {
-                const size = move.sizes[j];
+                const size = this.calculateSprite(i, j); //move.sizes[j];
 
-                if (
-                  x >= size.x &&
-                  x <= size.x + move.width &&
-                  y >= size.y &&
-                  y <= size.y + move.height
-                ) {
+                if (x >= size.x && x <= size.x + move.width && y >= size.y && y <= size.y + move.height) {
                   this.setState({
                     hoverMoveRectangleI: i,
-                    hoverMoveRectangleJ: j
+                    hoverMoveRectangleJ: j,
                   });
                   break;
                 }
@@ -420,6 +352,25 @@ export default class App extends Component {
             const x = (event.clientX - this.rect.left) * this.scaleX;
             const y = (event.clientY - this.rect.top) * this.scaleY;
 
+            for (let i = 0; i < this.state.moves.length; i++) {
+              const move = this.state.moves[i];
+              for (let j = 0; j < move.sizes.length; j++) {
+                const size = this.calculateSprite(i, j); // move.sizes[j];
+
+                if (x >= size.x && x <= size.x + move.width && y >= size.y && y <= size.y + move.height) {
+                  this.setState({
+                    selectMoveRectangleI: i,
+                    selectMoveRectangleJ: j,
+                  });
+                  break;
+                }
+              }
+            }
+
+            if (this.state.selectMoveRectangleI === -1 || this.state.selectMoveRectangleJ === -1) {
+              return;
+            }
+
             for (let i = 0; i < this.state.rectangles.length; i++) {
               const rectangle = this.state.rectangles[i];
               if (
@@ -428,69 +379,28 @@ export default class App extends Component {
                 y >= rectangle[1] &&
                 y <= rectangle[1] + rectangle[3]
               ) {
-                console.log(
-                  this.state.selectMoveRectangleI,
-                  this.state.selectMoveRectangleJ,
-                  i
-                );
-                // this.setState(prevState => ({
-                //   selectMoveRectangleI: -1,
-                //   selectMoveRectangleJ: -1
-                //   // selectedRectangle: prevState.selectedRectangle === i ? -1 : i
-                // }));
-
                 const imageData = this.state.context.getImageData(
                   rectangle[0],
                   rectangle[1],
                   rectangle[2],
-                  rectangle[3]
+                  rectangle[3],
                 );
 
                 const moves = Array.from(this.state.moves);
-                if (
-                  this.state.moves[this.state.selectMoveRectangleI].width <
-                  imageData.width
-                ) {
-                  moves[this.state.selectMoveRectangleI].width =
-                    imageData.width;
+                if (this.state.moves[this.state.selectMoveRectangleI].width < imageData.width) {
+                  moves[this.state.selectMoveRectangleI].width = imageData.width;
                 }
 
-                if (
-                  this.state.moves[this.state.selectMoveRectangleI].height <
-                  imageData.height
-                ) {
-                  moves[this.state.selectMoveRectangleI].height =
-                    imageData.height;
+                if (this.state.moves[this.state.selectMoveRectangleI].height < imageData.height) {
+                  moves[this.state.selectMoveRectangleI].height = imageData.height;
                 }
 
-                moves[this.state.selectMoveRectangleI].sizes[
-                  this.state.selectMoveRectangleJ
-                ].rectangle = i;
+                moves[this.state.selectMoveRectangleI].sizes[this.state.selectMoveRectangleJ].rectangle = i;
 
                 this.setState({
-                  moves
+                  moves,
                 });
                 break;
-              }
-            }
-
-            for (let i = 0; i < this.state.moves.length; i++) {
-              const move = this.state.moves[i];
-              for (let j = 0; j < move.sizes.length; j++) {
-                const size = move.sizes[j];
-
-                if (
-                  x >= size.x &&
-                  x <= size.x + move.width &&
-                  y >= size.y &&
-                  y <= size.y + move.height
-                ) {
-                  this.setState({
-                    selectMoveRectangleI: i,
-                    selectMoveRectangleJ: j
-                  });
-                  break;
-                }
               }
             }
           }}
@@ -499,33 +409,27 @@ export default class App extends Component {
           <div>
             <label>Width: {this.state.width}</label>
             <input
-              type="number"
+              type='number'
               value={this.state.width}
               onChange={event => {
-                this.setState(
-                  { width: event.target.value },
-                  this.updateRectangles
-                );
+                this.setState({ width: event.target.value }, this.updateRectangles);
               }}
             />
           </div>
           <div>
             <label>Height: {this.state.height}</label>
             <input
-              type="number"
+              type='number'
               value={this.state.height}
               onChange={event => {
-                this.setState(
-                  { height: event.target.value },
-                  this.updateRectangles
-                );
+                this.setState({ height: event.target.value }, this.updateRectangles);
               }}
             />
           </div>
           <div>
             <label>Moves: {this.state.moves.length}</label>
             <input
-              type="number"
+              type='number'
               value={this.state.newMove}
               onChange={event => {
                 this.setState({ newMove: event.target.value });
@@ -539,7 +443,7 @@ export default class App extends Component {
                 for (let j = 0; j < this.state.newMove; j++) {
                   sizes.push({
                     x: 250 + 40 * j,
-                    y: 30 + 60 * i
+                    y: 30 + 60 * i,
                   });
                 }
 
@@ -552,14 +456,14 @@ export default class App extends Component {
                         x: 250,
                         y: 20 + 60 * prevState.moves.length,
                         size: this.state.newMove,
-                        width: 30,
-                        height: 30,
-                        sizes
-                      }
-                    ]
+                        width: 20,
+                        height: 20,
+                        sizes,
+                      },
+                    ],
                     // newMove: 1
                   }),
-                  this.reload
+                  this.reload,
                 );
               }}
             >
@@ -576,12 +480,7 @@ export default class App extends Component {
             </div>
           ))}
         </div>
-        <img
-          ref="image"
-          src={sprite}
-          alt="sprite"
-          style={{ visibility: "hidden" }}
-        />
+        <img ref='image' src={sprite} alt='sprite' style={{ visibility: 'hidden' }} />
       </div>
     );
   }
