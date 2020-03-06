@@ -1,12 +1,13 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
-import sprite from './sprite.png';
+import sprite from "./sprite.png";
 
 export default class App extends Component {
   state = {
     width: 200,
     height: 192,
     moves: [],
+    newName: "",
     newMove: 5,
     rectangles: [],
     hoverRectangle: -1,
@@ -16,7 +17,7 @@ export default class App extends Component {
     selectMoveRectangleI: -1,
     selectMoveRectangleJ: -1,
     canvas: null,
-    context: null,
+    context: null
   };
 
   componentDidMount() {
@@ -24,11 +25,11 @@ export default class App extends Component {
 
     image.onload = () => {
       const canvas = this.refs.canvas;
-      const context = canvas.getContext('2d');
+      const context = canvas.getContext("2d");
 
       this.setState({
         canvas,
-        context,
+        context
       });
 
       this.rect = canvas.getBoundingClientRect(); // abs. size of element
@@ -36,6 +37,7 @@ export default class App extends Component {
       this.scaleY = canvas.height / this.rect.height; // relationship bitmap vs. element for Y
 
       this.updateRectangles();
+      window.requestAnimationFrame(() => this.animate());
     };
   }
 
@@ -53,7 +55,7 @@ export default class App extends Component {
     const width = +this.state.width;
     const height = +this.state.height;
 
-    context.strokeStyle = 'red';
+    context.strokeStyle = "red";
     context.beginPath();
     context.rect(0, 0, width, height);
     context.stroke();
@@ -66,14 +68,19 @@ export default class App extends Component {
     const columns = [];
 
     this.setState({
-      rectangles: [],
+      rectangles: []
     });
 
     for (let y = 0; y < height; y++) {
       let line = true;
       for (let x = 0; x < width; x++) {
         const pixelData = context.getImageData(x, y, 1, 1).data;
-        if (pixelData[0] !== 0 && pixelData[1] !== 0 && pixelData[2] !== 0 && pixelData[3] !== 0) {
+        if (
+          pixelData[0] !== 0 &&
+          pixelData[1] !== 0 &&
+          pixelData[2] !== 0 &&
+          pixelData[3] !== 0
+        ) {
           line = false;
           break;
         }
@@ -105,7 +112,12 @@ export default class App extends Component {
       let line = true;
       for (let y = 0; y < 200; y++) {
         const pixelData = context.getImageData(x, y, 1, 1).data;
-        if (pixelData[0] !== 0 && pixelData[1] !== 0 && pixelData[2] !== 0 && pixelData[3] !== 0) {
+        if (
+          pixelData[0] !== 0 &&
+          pixelData[1] !== 0 &&
+          pixelData[2] !== 0 &&
+          pixelData[3] !== 0
+        ) {
           line = false;
           break;
         }
@@ -185,7 +197,7 @@ export default class App extends Component {
           }
         }
 
-        context.strokeStyle = 'green';
+        context.strokeStyle = "green";
         context.beginPath();
         context.rect(X + x1, Y + y1, x2 - x1, y2 - y1);
         context.stroke();
@@ -195,7 +207,7 @@ export default class App extends Component {
     }
 
     this.setState({
-      rectangles,
+      rectangles
     });
   }
 
@@ -209,19 +221,19 @@ export default class App extends Component {
     const width = +this.state.width;
     const height = +this.state.height;
 
-    context.strokeStyle = 'red';
+    context.strokeStyle = "red";
     context.beginPath();
     context.rect(0, 0, width, height);
     context.stroke();
 
     if (this.state.hoverRectangle > -1) {
-      context.strokeStyle = 'blue';
+      context.strokeStyle = "blue";
       context.beginPath();
       context.rect(
         this.state.rectangles[this.state.hoverRectangle][0],
         this.state.rectangles[this.state.hoverRectangle][1],
         this.state.rectangles[this.state.hoverRectangle][2],
-        this.state.rectangles[this.state.hoverRectangle][3],
+        this.state.rectangles[this.state.hoverRectangle][3]
       );
       context.stroke();
     }
@@ -240,18 +252,31 @@ export default class App extends Component {
             this.state.rectangles[move.sizes[j].rectangle][0],
             this.state.rectangles[move.sizes[j].rectangle][1],
             this.state.rectangles[move.sizes[j].rectangle][2],
-            this.state.rectangles[move.sizes[j].rectangle][3],
+            this.state.rectangles[move.sizes[j].rectangle][3]
           );
 
-          this.state.context.putImageData(imageData, sizePosition.x, sizePosition.y);
+          const offsetX = (move.width - imageData.width) / 2;
+          const offsetY = (move.height - imageData.height) / 2;
+
+          this.state.context.putImageData(
+            imageData,
+            sizePosition.x + offsetX,
+            sizePosition.y + offsetY
+          );
         }
 
-        if (this.state.selectMoveRectangleI === i && this.state.selectMoveRectangleJ === j) {
-          context.strokeStyle = 'red';
-        } else if (this.state.hoverMoveRectangleI === i && this.state.hoverMoveRectangleJ === j) {
-          context.strokeStyle = 'blue';
+        if (
+          this.state.selectMoveRectangleI === i &&
+          this.state.selectMoveRectangleJ === j
+        ) {
+          context.strokeStyle = "red";
+        } else if (
+          this.state.hoverMoveRectangleI === i &&
+          this.state.hoverMoveRectangleJ === j
+        ) {
+          context.strokeStyle = "blue";
         } else {
-          context.strokeStyle = 'black';
+          context.strokeStyle = "black";
         }
 
         context.beginPath();
@@ -260,11 +285,77 @@ export default class App extends Component {
       }
 
       const previewPosition = this.calculateSprite(i, move.sizes.length);
-      context.strokeStyle = 'green';
+      context.strokeStyle = "green";
       context.beginPath();
-      context.rect(previewPosition.x - 1, previewPosition.y - 1, move.width + 2, move.height + 2);
+      context.rect(
+        previewPosition.x - 1,
+        previewPosition.y - 1,
+        move.width + 2,
+        move.height + 2
+      );
       context.stroke();
     }
+  }
+
+  animate() {
+    if (!this.start) {
+      this.start = 0;
+    }
+
+    if (!this.time) {
+      this.time = 0;
+    }
+
+    for (let i = 0; i < this.state.moves.length; i++) {
+      const move = this.state.moves[i];
+
+      let all = true;
+      for (let j = 0; j < move.sizes.length; j++) {
+        if (move.sizes[j].rectangle === -1) {
+          all = false;
+          break;
+        }
+      }
+
+      if (all) {
+        const previewPosition = this.calculateSprite(i, move.sizes.length);
+        this.state.context.clearRect(
+          previewPosition.x,
+          previewPosition.y,
+          move.width,
+          move.height
+        );
+
+        const index = this.start % move.sizes.length;
+        const imageData = this.state.context.getImageData(
+          this.state.rectangles[move.sizes[index].rectangle][0],
+          this.state.rectangles[move.sizes[index].rectangle][1],
+          this.state.rectangles[move.sizes[index].rectangle][2],
+          this.state.rectangles[move.sizes[index].rectangle][3]
+        );
+
+        this.state.context.putImageData(
+          imageData,
+          previewPosition.x,
+          previewPosition.y
+        );
+
+        // console.log("animate", this.time);
+      }
+    }
+
+    this.time++;
+
+    if (this.time > 10) {
+      this.start++;
+      this.time = 0;
+    }
+
+    // if (this.start === move.sizes.length) {
+    //   this.start = 0;
+    // }
+
+    window.requestAnimationFrame(() => this.animate());
   }
 
   calculateMove(i) {
@@ -278,7 +369,7 @@ export default class App extends Component {
 
     return {
       x: 250,
-      y,
+      y
     };
   }
 
@@ -291,17 +382,17 @@ export default class App extends Component {
 
     return {
       x,
-      y,
+      y
     };
   }
 
   render() {
     return (
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: "flex" }}>
         <canvas
-          ref='canvas'
+          ref="canvas"
           width={600}
-          height={window.innerHeight}
+          height={window.outerHeight}
           onMouseMove={event => {
             if (!this.rect) {
               return;
@@ -313,7 +404,7 @@ export default class App extends Component {
             this.setState({
               hoverRectangle: -1,
               hoverMoveRectangleI: -1,
-              hoverMoveRectangleJ: -1,
+              hoverMoveRectangleJ: -1
             });
 
             for (let i = 0; i < this.state.rectangles.length; i++) {
@@ -334,10 +425,15 @@ export default class App extends Component {
               for (let j = 0; j < move.sizes.length; j++) {
                 const size = this.calculateSprite(i, j); //move.sizes[j];
 
-                if (x >= size.x && x <= size.x + move.width && y >= size.y && y <= size.y + move.height) {
+                if (
+                  x >= size.x &&
+                  x <= size.x + move.width &&
+                  y >= size.y &&
+                  y <= size.y + move.height
+                ) {
                   this.setState({
                     hoverMoveRectangleI: i,
-                    hoverMoveRectangleJ: j,
+                    hoverMoveRectangleJ: j
                   });
                   break;
                 }
@@ -357,17 +453,25 @@ export default class App extends Component {
               for (let j = 0; j < move.sizes.length; j++) {
                 const size = this.calculateSprite(i, j); // move.sizes[j];
 
-                if (x >= size.x && x <= size.x + move.width && y >= size.y && y <= size.y + move.height) {
+                if (
+                  x >= size.x &&
+                  x <= size.x + move.width &&
+                  y >= size.y &&
+                  y <= size.y + move.height
+                ) {
                   this.setState({
                     selectMoveRectangleI: i,
-                    selectMoveRectangleJ: j,
+                    selectMoveRectangleJ: j
                   });
                   break;
                 }
               }
             }
 
-            if (this.state.selectMoveRectangleI === -1 || this.state.selectMoveRectangleJ === -1) {
+            if (
+              this.state.selectMoveRectangleI === -1 ||
+              this.state.selectMoveRectangleJ === -1
+            ) {
               return;
             }
 
@@ -383,22 +487,48 @@ export default class App extends Component {
                   rectangle[0],
                   rectangle[1],
                   rectangle[2],
-                  rectangle[3],
+                  rectangle[3]
                 );
 
                 const moves = Array.from(this.state.moves);
-                if (this.state.moves[this.state.selectMoveRectangleI].width < imageData.width) {
-                  moves[this.state.selectMoveRectangleI].width = imageData.width;
+                if (
+                  this.state.moves[this.state.selectMoveRectangleI].width <
+                  imageData.width
+                ) {
+                  moves[this.state.selectMoveRectangleI].width =
+                    imageData.width;
                 }
 
-                if (this.state.moves[this.state.selectMoveRectangleI].height < imageData.height) {
-                  moves[this.state.selectMoveRectangleI].height = imageData.height;
+                if (
+                  this.state.moves[this.state.selectMoveRectangleI].height <
+                  imageData.height
+                ) {
+                  moves[this.state.selectMoveRectangleI].height =
+                    imageData.height;
                 }
 
-                moves[this.state.selectMoveRectangleI].sizes[this.state.selectMoveRectangleJ].rectangle = i;
+                moves[this.state.selectMoveRectangleI].sizes[
+                  this.state.selectMoveRectangleJ
+                ].rectangle = i;
+
+                const nextI =
+                  this.state.selectMoveRectangleJ ===
+                  moves[this.state.selectMoveRectangleI].sizes.length - 1
+                    ? this.state.selectMoveRectangleI === moves.length - 1
+                      ? this.state.selectMoveRectangleI
+                      : this.state.selectMoveRectangleI + 1
+                    : this.state.selectMoveRectangleI;
+
+                const nextJ =
+                  this.state.selectMoveRectangleJ <
+                  moves[this.state.selectMoveRectangleI].sizes.length - 1
+                    ? this.state.selectMoveRectangleJ + 1
+                    : 0;
 
                 this.setState({
                   moves,
+                  selectMoveRectangleI: nextI,
+                  selectMoveRectangleJ: nextJ
                 });
                 break;
               }
@@ -409,32 +539,51 @@ export default class App extends Component {
           <div>
             <label>Width: {this.state.width}</label>
             <input
-              type='number'
+              type="number"
               value={this.state.width}
               onChange={event => {
-                this.setState({ width: event.target.value }, this.updateRectangles);
+                this.setState(
+                  { width: event.target.value },
+                  this.updateRectangles
+                );
               }}
             />
           </div>
           <div>
             <label>Height: {this.state.height}</label>
             <input
-              type='number'
+              type="number"
               value={this.state.height}
               onChange={event => {
-                this.setState({ height: event.target.value }, this.updateRectangles);
+                this.setState(
+                  { height: event.target.value },
+                  this.updateRectangles
+                );
               }}
             />
           </div>
+          <br />
           <div>
-            <label>Moves: {this.state.moves.length}</label>
-            <input
-              type='number'
-              value={this.state.newMove}
-              onChange={event => {
-                this.setState({ newMove: event.target.value });
-              }}
-            />
+            <div>
+              <label>Moves:</label>
+              <input
+                type="number"
+                value={this.state.newMove}
+                onChange={event => {
+                  this.setState({ newMove: event.target.value });
+                }}
+              />
+            </div>
+            <div>
+              <label>Name:</label>
+              <input
+                type="text"
+                value={this.state.newName}
+                onChange={event => {
+                  this.setState({ newName: event.target.value });
+                }}
+              />
+            </div>
             <button
               onClick={() => {
                 const sizes = [];
@@ -444,26 +593,29 @@ export default class App extends Component {
                   sizes.push({
                     x: 250 + 40 * j,
                     y: 30 + 60 * i,
+                    rectangle: -1
                   });
                 }
 
                 this.setState(
                   prevState => ({
+                    newName: "",
+                    selectMoveRectangleI: prevState.moves.length,
+                    selectMoveRectangleJ: 0,
                     moves: [
                       ...prevState.moves,
                       {
-                        name: prevState.moves.length + 1,
+                        name: this.state.newName,
                         x: 250,
                         y: 20 + 60 * prevState.moves.length,
                         size: this.state.newMove,
                         width: 20,
                         height: 20,
-                        sizes,
-                      },
-                    ],
-                    // newMove: 1
+                        sizes
+                      }
+                    ]
                   }),
-                  this.reload,
+                  this.reload
                 );
               }}
             >
@@ -472,15 +624,45 @@ export default class App extends Component {
           </div>
           {this.state.moves.map((m, i) => (
             <div key={i}>
-              <label>
-                Size {i + 1}: {m.size}
-              </label>
+              <label>{m.name}:</label>
+              <br />
 
-              {/* <button>Select sprite</button> */}
+              <button
+                onClick={() => {
+                  const moves = Array.from(this.state.moves);
+
+                  moves[i].width = 20;
+                  moves[i].height = 20;
+                  moves[i].sizes = moves[i].sizes.map(s => ({
+                    ...s,
+                    rectangle: -1
+                  }));
+
+                  this.setState({
+                    moves
+                  });
+                }}
+              >
+                Reset
+              </button>
+              <button
+                onClick={() => {
+                  this.setState({
+                    moves: this.state.moves.filter((_, index) => index !== i)
+                  });
+                }}
+              >
+                Delete
+              </button>
             </div>
           ))}
         </div>
-        <img ref='image' src={sprite} alt='sprite' style={{ visibility: 'hidden' }} />
+        <img
+          ref="image"
+          src={sprite}
+          alt="sprite"
+          style={{ visibility: "hidden" }}
+        />
       </div>
     );
   }
